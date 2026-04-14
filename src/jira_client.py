@@ -28,7 +28,7 @@ class JiraClient:
 
     def _get(self, path: str, params: dict = None) -> dict:
         url = f"{self._base}/rest/api/2/{path}"
-        response = requests.get(url, headers=self._headers, params=params, verify=False)
+        response = requests.get(url, headers=self._headers, params=params, verify=False, timeout=30)
         response.raise_for_status()
         return response.json()
 
