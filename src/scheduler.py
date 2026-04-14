@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -16,7 +17,8 @@ async def run_reminder(bot: discord.Client) -> None:
     logger.info("Đang lấy dữ liệu từ Jira...")
     try:
         jira = JiraClient()
-        issues = jira.get_active_sprint_issues()
+        loop = asyncio.get_event_loop()
+        issues = await loop.run_in_executor(None, jira.get_active_sprint_issues)
         logger.info(f"Tìm thấy {len(issues)} issue cần nhắc.")
         await send_reminders(bot, issues)
     except Exception:

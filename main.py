@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import discord
 from discord.ext import commands
@@ -109,7 +110,8 @@ async def cmd_mytasks(ctx: commands.Context, jira_username: str = None):
 
     try:
         jira = JiraClient()
-        issues = jira.get_my_issues(jira_username)
+        loop = asyncio.get_event_loop()
+        issues = await loop.run_in_executor(None, jira.get_my_issues, jira_username)
         if not issues:
             await ctx.send(f"✅ **{jira_username}** không có task nào trong sprint hiện tại!")
             return
@@ -133,7 +135,8 @@ async def cmd_priority(ctx: commands.Context, filter_priority: str = None):
     await ctx.send("⏳ Đang lấy dữ liệu từ Jira...")
     try:
         jira = JiraClient()
-        issues = jira.get_active_sprint_issues()
+        loop = asyncio.get_event_loop()
+        issues = await loop.run_in_executor(None, jira.get_active_sprint_issues)
         if filter_priority:
             issues = [i for i in issues if i.priority.lower() == filter_priority.lower()]
         for embed in build_priority_embeds(issues):
@@ -147,7 +150,8 @@ async def cmd_jira_status(ctx: commands.Context):
     from src.jira_client import JiraClient
     try:
         jira = JiraClient()
-        issues = jira.get_active_sprint_issues()
+        loop = asyncio.get_event_loop()
+        issues = await loop.run_in_executor(None, jira.get_active_sprint_issues)
         await ctx.send(f"✅ Kết nối Jira OK — tìm thấy **{len(issues)}** issue đang theo dõi.")
     except Exception as e:
         await ctx.send(f"❌ Lỗi kết nối Jira: `{e}`")
